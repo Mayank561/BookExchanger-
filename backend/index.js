@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const connectDb = require("./config/db");
 const compression = require("compression");
-const Message = require("./models/Messge");
+const Message = require("./models/Message");
 const { sendChatMail } = require("./controller/users");
 const User = require("./models/User");
 
@@ -11,14 +11,21 @@ dotenv.config({ path: "./config/config.env" });
 const app = express();
 
 app.use(compression());
-if (typeof window === "undefined") {
-  global.window = {};
-}
 connectDb();
 
 app.get("/", (req, res) => {
   res.send("This is Bookxchanger");
 });
+
+const cors = require("cors");
+const corsOptions = {
+  origin: "https://book-exchanger.vercel.app",
+  methods: ["GET", "PUT", "POST", "DELETE", "PATCH"],
+  allowedHeaders: ["authorization", "Content-Type", "origin", "x-requested-with"],
+  credentials: true,
+  maxAge: 86400,
+};
+app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
@@ -26,23 +33,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS Configuration
-const cors = require("cors");
-const corsOptions = {
-  origin: "https://book-exchanger.vercel.app",
-  methods: "GET,PUT,POST,DELETE,PATCH",
-  allowedHeaders: "authorization,Content-Type,origin,x-requested-with",
-  credentials: true,
-  maxAge: 86400,
-};
-app.use(cors(corsOptions));
-
 app.use(express.json({ limit: "80mb", extended: true }));
 app.use(express.urlencoded({ limit: "80mb", extended: true }));
 app.use("/books/", require("./routes/books"));
 app.use("/users/", require("./routes/users"));
 
-var server = app.listen(PORT, () =>
+const server = app.listen(PORT, () =>
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
 );
 
@@ -56,9 +52,15 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", async (socket) => {
-  socket.on("disconnect", () => {});
+  console.log('A user connected');
 
-  socket.on("landing_page", (data) => {});
+  socket.on("disconnect", () => {
+    console.log('User disconnected');
+  });
+
+  socket.on("landing_page", (data) => {
+    console.log('Landing page event received:', data);
+  });
 
   socket.on("login", (data) => {
     if (!socket.rooms.has(data.id)) {
@@ -71,14 +73,18 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("join", async (data) => {
-    var messages = await Message.find({
-      $or: [
-        { from: data.id, to: data.receiver },
-        { from: data.receiver, to: data.id },
-      ],
-    });
+    try {
+      const messages = await Message.find({
+        $or: [
+          { from: data.id, to: data.receiver },
+          { from: data.receiver, to: data.id },
+        ],
+      });
 
-    socket.emit("initial_msgs", messages);
+      socket.emit("initial_msgs", messages);
+    } catch (err) {
+      console.error("Error fetching messages:", err);
+    }
   });
 
   socket.on("message", async (msg) => {
@@ -92,35 +98,19 @@ io.on("connection", async (socket) => {
       });
       await message.save();
       if (socket.adapter.rooms.has(msg.to)) {
-        await io.sockets.in(msg.from).emit("send_msg", {
-          content: message.content,
-          from: message.from,
-          to: message.to,
-          fromName: msg.fromName,
-          sentAt: message.sentAt,
-        });
-        await io.sockets.in(msg.to).emit("send_msg", {
-          content: message.content,
-          from: message.from,
-          to: message.to,
-          fromName: msg.fromName,
-          sentAt: message.sentAt,
-        });
+        io.sockets.in(msg.from).emit("send_msg", message);
+        io.sockets.in(msg.to).emit("send_msg", message);
       } else {
-        await io.sockets.in(msg.from).emit("send_msg", {
-          content: message.content,
-          from: message.from,
-          to: message.to,
-          fromName: msg.fromName,
-          sentAt: message.sentAt,
-        });
+        io.sockets.in(msg.from).emit("send_msg", message);
         const receiver = await User.findById(message.to);
-        await sendChatMail(
-          receiver.email,
-          receiver.name,
-          message.fromName,
-          `https://book-exchanger.vercel.app/user/${message.from}`
-        );
+        if (receiver) {
+          await sendChatMail(
+            receiver.email,
+            receiver.name,
+            message.fromName,
+            `https://book-exchanger.vercel.app/user/${message.from}`
+          );
+        }
       }
     } catch (err) {
       console.error("Error sending message:", err);
