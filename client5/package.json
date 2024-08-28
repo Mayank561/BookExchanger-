@@ -72,5 +72,5 @@
   "globals": {
     "_": true
   },
-  "proxy": "https://bookxchanger-app.herokuapp.com/"
+  "proxy": "https://bookexchanger.onrender.com/"
 }
