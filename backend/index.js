@@ -20,7 +20,6 @@ app.get("/", (req, res) => {
   res.send("This is Bookxchanger");
 });
 
-// Middleware for Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
@@ -30,7 +29,7 @@ app.use((req, res, next) => {
 // CORS Configuration
 const cors = require("cors");
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: "https://book-exchanger.vercel.app",
   methods: "GET,PUT,POST,DELETE,PATCH",
   allowedHeaders: "authorization,Content-Type,origin,x-requested-with",
   credentials: true,
@@ -49,7 +48,7 @@ var server = app.listen(PORT, () =>
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://book-exchanger.vercel.app",
     methods: ["GET", "POST"],
     allowedHeaders: ["authorization", "Content-Type"],
     credentials: true,
@@ -120,7 +119,7 @@ io.on("connection", async (socket) => {
           receiver.email,
           receiver.name,
           message.fromName,
-          `http://localhost:3000/user/${message.from}`
+          `https://book-exchanger.vercel.app/user/${message.from}`
         );
       }
     } catch (err) {

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const API = axios.create({
-  baseURL: "https://bookexchanger.onrender.com/",
+  baseURL: "https://bookexchanger.onrender.com",
 });
 
 API.interceptors.request.use((req) => {
