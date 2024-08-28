@@ -1,0 +1,21 @@
+body {
+  background-attachment: fixed;
+  background-size: contain;
+  font-family: "Patrick Hand" !important;
+}
+#root {
+  padding: 0px !important;
+  margin: 0 !important;
+}
+#root > .MuiContainer-root {
+  padding: 0px !important;
+  margin-right: 0px !important;
+  margin-left: 0px !important;
+}
+
+#root > .MuiContainer-maxWidthLg {
+  max-width: 14208px !important;
+}
+.makeStyles-appBarSpacer-2 {
+  min-height: 44px !important;
+}

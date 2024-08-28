@@ -1,0 +1,6 @@
+{
+    "editor.formatOnSave": true,
+    "files.autoSave": "onWindowChange",
+    "editor.defaultColorDecorators": true,
+    "editor.defaultFormatter": "formulahendry.auto-close-tag"
+}
