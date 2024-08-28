@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 
 const cors = require("cors");
 const corsOptions = {
-  origin: "https://book-exchanger.vercel.app",
+  origin: "https://book-exchanger-g0rwvg8j4-mayanks-projects-a6ea03be.vercel.app/",
   methods: ["GET", "PUT", "POST", "DELETE", "PATCH"],
   allowedHeaders: ["authorization", "Content-Type", "origin", "x-requested-with"],
   credentials: true,
@@ -44,7 +44,7 @@ const server = app.listen(PORT, () =>
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "https://book-exchanger.vercel.app",
+    origin: "https://book-exchanger-g0rwvg8j4-mayanks-projects-a6ea03be.vercel.app/",
     methods: ["GET", "POST"],
     allowedHeaders: ["authorization", "Content-Type"],
     credentials: true,
@@ -108,7 +108,7 @@ io.on("connection", async (socket) => {
             receiver.email,
             receiver.name,
             message.fromName,
-            `https://book-exchanger.vercel.app/user/${message.from}`
+            `https://book-exchanger-g0rwvg8j4-mayanks-projects-a6ea03be.vercel.app/user/${message.from}`
           );
         }
       }
