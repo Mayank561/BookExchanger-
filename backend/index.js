@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const connectDb = require("./config/db");
 const compression = require("compression");
-const Message = require("./models/Message");
+const Message = require('./models/Messge');
 const { sendChatMail } = require("./controller/users");
 const User = require("./models/User");
 
