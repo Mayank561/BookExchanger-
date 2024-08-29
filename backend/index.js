@@ -23,14 +23,14 @@ app.get("/", (req, res) => {
 });
 
 app.use((req, res, next) => {
-  res.append("Access-Control-Allow-Origin", "https://book-exchanger-g0rwvg8j4-mayanks-projects-a6ea03be.vercel.app");
+  res.append("Access-Control-Allow-Origin", "https://book-exchanger-jk93fkvwr-mayanks-projects-a6ea03be.vercel.app");
   res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH");
   res.append(
     "Access-Control-Allow-Headers",
     "authorization,Content-Type,origin, x-requested-with"
   );
   res.append("Access-Control-Allow-Credentials", "true");
-  res.append("Origin", "https://book-exchanger-g0rwvg8j4-mayanks-projects-a6ea03be.vercel.app");
+  res.append("Origin", "https://book-exchanger-jk93fkvwr-mayanks-projects-a6ea03be.vercel.app");
   res.append("Access-Control-Max-Age", "86400");
   next();
 });
@@ -46,7 +46,7 @@ var server = app.listen(PORT, () =>
 
 options = {
   cors: true,
-  origins: ["https://book-exchanger-g0rwvg8j4-mayanks-projects-a6ea03be.vercel.app:8000"],
+  origins: ["https://book-exchanger-jk93fkvwr-mayanks-projects-a6ea03be.vercel.app"],
 };
 const io = require("socket.io")(server, options);
 
@@ -115,7 +115,7 @@ io.on("connection", async (socket) => {
           receiver.email,
           receiver.name,
           message.fromName,
-          `https://book-exchanger-g0rwvg8j4-mayanks-projects-a6ea03be.vercel.app/user/${message.from}`
+          `https://book-exchanger-jk93fkvwr-mayanks-projects-a6ea03be.vercel.app/user/${message.from}`
         );
       }
     } catch (err) {}
