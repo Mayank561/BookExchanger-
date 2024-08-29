@@ -1,40 +1,52 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const connectDb = require("./config/db");
+const connectDB = require("./config/db");
 const compression = require("compression");
-const Message = require('./models/Messge');
+const cors = require("cors");
+const helmet = require("helmet");
+const Message = require("./models/Messge");
 const { sendChatMail } = require("./controller/users");
 const User = require("./models/User");
 
-const PORT = process.env.PORT || 8000;
 dotenv.config({ path: "./config/config.env" });
 const app = express();
+const PORT = process.env.PORT || 8000;
 
 app.use(compression());
-connectDb();
+app.use(express.json({ limit: "80mb", extended: true }));
+app.use(express.urlencoded({ limit: "80mb", extended: true }));
+
+app.use(helmet());
+
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  next();
+});
+
+// CORS setup
+const corsOptions = {
+  origin:
+    "https://book-exchanger-git-main-mayanks-projects-a6ea03be.vercel.app",
+  methods: ["GET", "PUT", "POST", "DELETE", "PATCH"],
+  allowedHeaders: [
+    "authorization",
+    "Content-Type",
+    "origin",
+    "x-requested-with",
+  ],
+  credentials: true,
+  maxAge: 86400,
+};
+
+app.use(cors(corsOptions));
+
+connectDB();
 
 app.get("/", (req, res) => {
   res.send("This is Bookxchanger");
 });
 
-const cors = require("cors");
-const corsOptions = {
-  origin: "https://book-exchanger.vercel.app",
-  methods: ["GET", "PUT", "POST", "DELETE", "PATCH"],
-  allowedHeaders: ["authorization", "Content-Type", "origin", "x-requested-with"],
-  credentials: true,
-  maxAge: 86400,
-};
-app.use(cors(corsOptions));
-
-app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-  next();
-});
-
-app.use(express.json({ limit: "80mb", extended: true }));
-app.use(express.urlencoded({ limit: "80mb", extended: true }));
 app.use("/books/", require("./routes/books"));
 app.use("/users/", require("./routes/users"));
 
@@ -44,22 +56,22 @@ const server = app.listen(PORT, () =>
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "https://book-exchanger.vercel.app",
+    origin:
+      "https://book-exchanger-git-main-mayanks-projects-a6ea03be.vercel.app",
     methods: ["GET", "POST"],
-    allowedHeaders: ["authorization", "Content-Type"],
     credentials: true,
   },
 });
 
 io.on("connection", async (socket) => {
-  console.log('A user connected');
+  console.log(`New connection: ${socket.id}`);
 
   socket.on("disconnect", () => {
-    console.log('User disconnected');
+    console.log(`Disconnected: ${socket.id}`);
   });
 
   socket.on("landing_page", (data) => {
-    console.log('Landing page event received:', data);
+    console.log("Landing page event:", data);
   });
 
   socket.on("login", (data) => {
@@ -73,18 +85,13 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("join", async (data) => {
-    try {
-      const messages = await Message.find({
-        $or: [
-          { from: data.id, to: data.receiver },
-          { from: data.receiver, to: data.id },
-        ],
-      });
-
-      socket.emit("initial_msgs", messages);
-    } catch (err) {
-      console.error("Error fetching messages:", err);
-    }
+    const messages = await Message.find({
+      $or: [
+        { from: data.id, to: data.receiver },
+        { from: data.receiver, to: data.id },
+      ],
+    });
+    socket.emit("initial_msgs", messages);
   });
 
   socket.on("message", async (msg) => {
@@ -97,23 +104,41 @@ io.on("connection", async (socket) => {
         sentAt: Date.now(),
       });
       await message.save();
-      if (socket.adapter.rooms.has(msg.to)) {
-        io.sockets.in(msg.from).emit("send_msg", message);
-        io.sockets.in(msg.to).emit("send_msg", message);
+
+      const rooms = socket.adapter.rooms;
+      if (rooms.has(msg.to)) {
+        io.to(msg.to).emit("send_msg", {
+          content: message.content,
+          from: message.from,
+          to: message.to,
+          fromName: msg.fromName,
+          sentAt: message.sentAt,
+        });
+        io.to(msg.from).emit("send_msg", {
+          content: message.content,
+          from: message.from,
+          to: message.to,
+          fromName: msg.fromName,
+          sentAt: message.sentAt,
+        });
       } else {
-        io.sockets.in(msg.from).emit("send_msg", message);
+        io.to(msg.from).emit("send_msg", {
+          content: message.content,
+          from: message.from,
+          to: message.to,
+          fromName: msg.fromName,
+          sentAt: message.sentAt,
+        });
         const receiver = await User.findById(message.to);
-        if (receiver) {
-          await sendChatMail(
-            receiver.email,
-            receiver.name,
-            message.fromName,
-            `https://book-exchanger.vercel.app/user/${message.from}`
-          );
-        }
+        await sendChatMail(
+          receiver.email,
+          receiver.name,
+          message.fromName,
+          `http://https://book-exchanger-git-main-mayanks-projects-a6ea03be.vercel.app/user/${message.from}`
+        );
       }
     } catch (err) {
-      console.error("Error sending message:", err);
+      console.error("Error handling message:", err);
     }
   });
 });

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { ADDFILTER } from "../../constants/action.js";
+import { ADDFILTER } from "../../constants/action";
 import { css } from "@emotion/react";
 import {
   Button,
@@ -15,12 +15,12 @@ import {
 } from "@material-ui/core";
 import Book from "./Book/Book";
 import useStyles from "./style";
-import SearchBox from "./SearchBar/SearchBox.js";
+import SearchBox from "./SearchBar/SearchBox";
 import Zoom from "react-reveal/Zoom";
 import PulseLoader from "react-spinners/PulseLoader";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { getBooks } from "../../actions/Books.js";
-import { Pagination } from "./pagination/Pagination.js";
+import { getBooks } from "../../actions/Books";
+import { Pagination } from "./pagination/Pagination";
 import { useHistory } from "react-router-dom";
 
 const AllBooks = () => {
@@ -28,20 +28,20 @@ const AllBooks = () => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const allBooks = useSelector((state) => state.books);
+  const filterData = useSelector((state) => state.filterData);
   const [books, setBooks] = useState([]);
   const [sortbool, setSortbool] = useState(false);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortType, setSortType] = useState("");
-  const filterData = useSelector((state) => state.filterData);
-  const [currentPage, setcurrentPage] = useState(1);
-  const [booksPerpage] = useState(12);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [booksPerPage] = useState(12);
 
   useEffect(() => {
     if (allBooks.length === 0) {
       dispatch(getBooks());
     }
-  });
+  }, [dispatch, allBooks.length]);
 
   useEffect(() => {
     dispatch({ type: ADDFILTER, payload: books });
@@ -49,21 +49,16 @@ const AllBooks = () => {
 
   useEffect(() => {
     if (allBooks.length !== 0) {
+      setBooks(allBooks.filter((book) => !book.isSold));
       setLoading(false);
     }
   }, [allBooks]);
 
   useEffect(() => {
-    if (allBooks.length !== 0) {
-      setBooks(allBooks.filter((book) => book.isSold === false));
-    }
-  }, [dispatch, allBooks]);
-
-  useEffect(() => {
-    if (sortbool === true) {
+    if (sortbool) {
       dispatch({ type: ADDFILTER, payload: data });
     }
-  }, [dispatch, data]);
+  }, [dispatch, sortbool, data]);
 
   useEffect(() => {
     const sortArray = (type) => {
@@ -77,29 +72,19 @@ const AllBooks = () => {
       };
 
       const sortProperty = types[type];
+      let sorted = [...books].sort((a, b) => a[sortProperty] - b[sortProperty]);
 
-      if (type === "pricelowest") {
-        const sorted = [...books].sort(
-          (b, a) => b[sortProperty] - a[sortProperty]
-        );
-        setData(sorted);
-      } else if (type === "datenewest") {
-        const sorted = [...books].sort(
-          (b, a) => b[sortProperty] - a[sortProperty]
-        );
+      if (type === "datenewest" || type === "pricehighest") {
         sorted.reverse();
-        setData(sorted);
-      } else {
-        const sorted = [...books].sort(
-          (a, b) => b[sortProperty] - a[sortProperty]
-        );
-        setData(sorted);
       }
+
+      setData(sorted);
     };
-    if (sortType !== "") {
+
+    if (sortType) {
       sortArray(sortType);
     }
-  }, [sortType]);
+  }, [sortType, books]);
 
   const override = css`
     display: block;
@@ -113,11 +98,11 @@ const AllBooks = () => {
     dispatch({ type: ADDFILTER, payload: books });
   };
 
-  const indexLast = currentPage * booksPerpage;
-  const indexFirst = indexLast - booksPerpage;
+  const indexLast = currentPage * booksPerPage;
+  const indexFirst = indexLast - booksPerPage;
   const currentBooks = filterData.slice(indexFirst, indexLast);
 
-  const paginate = (pageNumber) => setcurrentPage(pageNumber);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <>
@@ -125,7 +110,7 @@ const AllBooks = () => {
         className={classes.back}
         onClick={() => history.goBack()}
         fontSize="large"
-      ></ArrowBackIcon>
+      />
       <div className={classes.maincontainer}>
         <Zoom>
           <SearchBox />
@@ -151,11 +136,9 @@ const AllBooks = () => {
                   labelId="type-label"
                   id="sortType"
                   label="SORT BY"
-                  name="sortType"
                   className={classes.box}
                   value={sortType}
                   onChange={(e) => setSortType(e.target.value)}
-                  placeholder="Select Price Type"
                 >
                   <MenuItem value="datenewest">Newest to Oldest</MenuItem>
                   <MenuItem value="dateoldest">Oldest to Newest</MenuItem>
@@ -182,7 +165,6 @@ const AllBooks = () => {
                     color="#e98074"
                     css={override}
                     size={30}
-                    style={{ background: "rgb(234,231,220)" }}
                   />
                 </div>
               ) : filterData.length === 0 ? (
@@ -197,15 +179,15 @@ const AllBooks = () => {
                   spacing={3}
                 >
                   {currentBooks.map((book) => (
-                    <Grid className={classes.grid}>
-                      <Book key={book._id} book={book} />
+                    <Grid item xs={12} sm={6} md={4} key={book._id}>
+                      <Book book={book} />
                     </Grid>
                   ))}
                 </Grid>
               )}
               <br />
               <Pagination
-                booksPerpage={booksPerpage}
+                booksPerPage={booksPerPage}
                 totalBooks={filterData.length}
                 paginate={paginate}
               />

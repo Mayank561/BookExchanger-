@@ -2,39 +2,20 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Container } from "@material-ui/core";
 import PostAdForm from "./components/PostAd/PostAdForm.js";
-// import Home from "./components/HomePageComponents/Home.js";
 import Home from "./components/HomePage/Home.js";
-
-// import Loading from "./components/Loading/Loading.js";
 import Loading from "./components/Loading/Loading.js";
 import Auth from "./components/Auth/Auth";
-// import DisplayBooks from "./components/AllBooksComponents/AllBooks";
 import DisplayBooks from "./components/AllBooks/AllBooks.js";
 import Navbar from "./components/NavBar/Nav.js";
-// import Navbar from "./components/Navbar/Navbar";
 import Profile from "./components/Profile/Profile";
-// import Wishlist from "./components/WishlistComponent/Wishlist.js";
 import Wishlist from "./components/WishList/WishList.js";
 import Footer from "./components/Footer/Footer.js";
-// import BookInfo from "./components/AllBooksComponents/BookInfo/BookInfo";
 import BookInfo from "./components/AllBooks/BookInfo/BookInfo.js";
-
-// import EditBook from "./components/EditBookComponents/Form";
 import EditBook from "./components/EditBook/Form.js";
-
-// import About from "./components/AboutUsComponents/About.js";
 import About from "./components/About/Abour.js";
-
-// import history from "./history/history.js";
 import history from "./history/history.js";
-
-// import OtherUser from "./components/OtherUserComponents/OtherUser";
 import OtherUser from "./components/OtherUser/OtherUser.js";
-
-// import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
-
 import ForgotPassword from "./components/ForgetPassword/Forget.js";
-
 import NotificationsActiveIcon from "@material-ui/icons/NotificationsActive";
 import MuiAlert from "@material-ui/lab/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
@@ -43,7 +24,6 @@ import { green } from "@material-ui/core/colors";
 import { useDispatch, useSelector } from "react-redux";
 import VerifyEmail from "./components/VerifyEmail/VerifyEmail";
 import { socket } from "./service/socket";
-// import { GET_NOTIFICATION, CLEAR_NOTIFICATION } from "./constants/actions.js";
 import { GET_NOTIFICATION, CLEAR_NOTIFICATION } from "./constants/action.js";
 
 const App = () => {
@@ -56,12 +36,11 @@ const App = () => {
     if (notification.content) {
       if (notification.from !== user.profile.id) setNotifaction(true);
     }
-  }, [Notification]);
+  }, [notification]);
 
   useEffect(() => {
     if (localStorage.getItem("profile")) {
       socket.connect();
-
       const id = JSON.parse(localStorage.getItem("profile")).profile.id;
       socket.on("connect", () => {
         socket.emit("login", { id: id });
@@ -73,7 +52,7 @@ const App = () => {
     socket.on("send_msg", (msg) => {
       dispatch({ type: GET_NOTIFICATION, payload: msg });
     });
-  }, []);
+  }, [dispatch]);
 
   const Alret = (props) => {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -92,16 +71,9 @@ const App = () => {
   };
 
   function displayLoading() {
-    history.push(`/user/${notification.from}`);
-  }
-
-  function displayLoading() {
     return <Loading />;
   }
 
-  useEffect(() => {
-    displayLoading();
-  }, []);
   return (
     <Router>
       <Container maxWidth="lg">
@@ -109,7 +81,7 @@ const App = () => {
         {shownotifaction ? (
           <Snackbar
             style={{ top: "10%", left: "55%", cursor: "pointer" }}
-            onChangeOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "top" }}
             open={shownotifaction}
             autoHideDuration={500}
             onClose={handleCloseNotify}
@@ -153,7 +125,6 @@ const App = () => {
             component={ForgotPassword}
           />
           <Route exact path="/verify-email/:token" component={VerifyEmail} />
-          {/* </Route> */}
         </Switch>
         <Footer />
       </Container>

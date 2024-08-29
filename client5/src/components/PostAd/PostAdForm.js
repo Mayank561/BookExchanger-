@@ -59,6 +59,7 @@ const PostAdForm = () => {
   const [err, setErr] = useState(false);
   const book = useSelector((state) => state.book);
   const compress = new Compress();
+
   const addImage = async (e) => {
     const files = [...e.target.files];
     const imageData = await compress.compress(files, {
@@ -97,7 +98,6 @@ const PostAdForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     dispatch(
       createBookAd(
         {
@@ -144,12 +144,12 @@ const PostAdForm = () => {
                     className={classes.formControl}
                     fullWidth
                   >
-                    <InputLabel id="type-label">
+                    <InputLabel id="branch-label">
                       Engineering Branch related to Book
                     </InputLabel>
                     <Select
-                      labelId="type-label"
-                      id="type"
+                      labelId="branch-label"
+                      id="branch"
                       label="Engineering Branch related to Book"
                       name="branch"
                       onChange={handleChange}
@@ -211,11 +211,11 @@ const PostAdForm = () => {
                       className={classes.formControl}
                       fullWidth
                     >
-                      <InputLabel id="conditionTypeLabel">
+                      <InputLabel id="condition-label">
                         Condition Of Book
                       </InputLabel>
                       <Select
-                        labelId="conditionLabel"
+                        labelId="condition-label"
                         id="condition"
                         label="Condition Of Book"
                         onChange={handleChange}
@@ -243,9 +243,9 @@ const PostAdForm = () => {
                       className={classes.formControl}
                       fullWidth
                     >
-                      <InputLabel id="type-label">Price Type</InputLabel>
+                      <InputLabel id="price-type-label">Price Type</InputLabel>
                       <Select
-                        labelId="type-label"
+                        labelId="price-type-label"
                         id="priceType"
                         label="Price Type"
                         name="priceType"
@@ -276,9 +276,9 @@ const PostAdForm = () => {
                         id="contained-button-file"
                         multiple
                         type="file"
+                        onChange={addImage}
                       />
-
-                      <label htmlFor="icon-button-file">
+                      <label htmlFor="contained-button-file">
                         <Button
                           variant="contained"
                           component="span"
@@ -287,23 +287,13 @@ const PostAdForm = () => {
                           Upload Photos Of Book
                         </Button>
                       </label>
-                      <input
-                        accept="image/*"
-                        className={classes.input}
-                        id="icon-button-file"
-                        type="file"
-                        onChange={addImage}
-                        multiple
-                      />
-                      <label htmlFor="icon-button-file">
-                        <IconButton
-                          style={{ backgroundColor: "#E85A4F" }}
-                          aria-label="upload picture"
-                          component="span"
-                        >
-                          <PhotoCamera />
-                        </IconButton>
-                      </label>
+                      <IconButton
+                        style={{ backgroundColor: "#E85A4F" }}
+                        aria-label="upload picture"
+                        component="span"
+                      >
+                        <PhotoCamera />
+                      </IconButton>
                     </div>
                   </Grid>
                 </Grid>
@@ -311,6 +301,7 @@ const PostAdForm = () => {
             </Container>
           </Grow>
         );
+
       case 2:
         return (
           <Grow in>
@@ -321,9 +312,9 @@ const PostAdForm = () => {
                     <TextField
                       name="tags"
                       variant="outlined"
-                      label="Add Tags(seperated by commas)"
+                      label="Add Tags (separated by commas)"
                       fullWidth
-                      value={bookData.tags}
+                      value={bookData.tags.join(",")}
                       onChange={(e) =>
                         setBookData({
                           ...bookData,
@@ -336,9 +327,9 @@ const PostAdForm = () => {
                     <TextField
                       name="noOfPages"
                       variant="outlined"
-                      label="Number Of Pages(Approx)"
-                      value={bookData.noOfPages}
+                      label="Number Of Pages (Approx)"
                       fullWidth
+                      value={bookData.noOfPages}
                       onChange={handleChange}
                     />
                   </Grid>
@@ -378,6 +369,7 @@ const PostAdForm = () => {
             </Container>
           </Grow>
         );
+
       default:
         return "Unknown stepIndex";
     }
@@ -390,13 +382,13 @@ const PostAdForm = () => {
     active: {
       "& $line": {
         backgroundImage:
-          "linear-gradient( 95deg,rgb(242,113,33) 0%,rgb(233,64,87) 50%,rgb(138,35,135) 100%)",
+          "linear-gradient(95deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)",
       },
     },
     completed: {
       "& $line": {
         backgroundImage:
-          "linear-gradient( 95deg,rgb(242,113,33) 0%,rgb(233,64,87) 50%,rgb(138,35,135) 100%)",
+          "linear-gradient(95deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)",
       },
     },
     line: {
@@ -421,12 +413,12 @@ const PostAdForm = () => {
     },
     active: {
       backgroundImage:
-        "linear-gradient( 136deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)",
+        "linear-gradient(136deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)",
       boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)",
     },
     completed: {
       backgroundImage:
-        "linear-gradient( 136deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)",
+        "linear-gradient(136deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)",
     },
   });
 
@@ -439,6 +431,7 @@ const PostAdForm = () => {
       2: <AddToPhotosOutlinedIcon />,
       3: <AssignmentOutlinedIcon />,
     };
+
     return (
       <div
         className={clsx(classes.root, {
@@ -452,17 +445,8 @@ const PostAdForm = () => {
   }
 
   ColorlibStepIcon.propTypes = {
-    /**
-     * Whether this step is active.
-     */
     active: PropTypes.bool,
-    /**
-     * Mark the step as completed. Is passed to child components.
-     */
     completed: PropTypes.bool,
-    /**
-     * The label displayed in the step icon.
-     */
     icon: PropTypes.node,
   };
 
@@ -483,10 +467,10 @@ const PostAdForm = () => {
         className={classes.back}
         onClick={() => history.goBack()}
         fontSize="large"
-      ></ArrowBackIcon>
+      />
       {err ? (
         <Snackbar
-          style={{ top: "10%", left: "50%", align: "center" }}
+          style={{ top: "10%", left: "50%", transform: "translateX(-50%)" }}
           anchorOrigin={{ horizontal: "center", vertical: "top" }}
           open={err}
           autoHideDuration={5000}
@@ -507,19 +491,16 @@ const PostAdForm = () => {
               connector={<ColorlibConnector />}
               style={{ background: "#eae7dc" }}
             >
-              {steps.map((label) => {
-                return (
-                  <Step key={label}>
-                    <StepLabel StepIconComponent={ColorlibStepIcon}>
-                      {label}
-                    </StepLabel>
-                  </Step>
-                );
-              })}
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel StepIconComponent={ColorlibStepIcon}>
+                    {label}
+                  </StepLabel>
+                </Step>
+              ))}
             </Stepper>
           </Box>
         </Grow>
-
         <div>
           <Typography>{getStepContent(activeStep)}</Typography>
           <Box align="center">
@@ -534,10 +515,10 @@ const PostAdForm = () => {
               <Button
                 variant="contained"
                 color="primary"
-                disabled
+                type="submit"
                 className={classes.nextbutton}
               >
-                Next
+                Submit
               </Button>
             ) : (
               <Button

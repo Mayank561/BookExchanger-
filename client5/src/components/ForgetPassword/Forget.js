@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Typography, Button, Box, Container } from "@material-ui/core";
 import InputLabel from "@material-ui/core/InputLabel";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -6,7 +6,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import LockIcon from "@material-ui/icons/Lock";
-import useStyles from "./styles.js";
+import useStyles from "./styles";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
 import MuiAlert from "@material-ui/lab/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
@@ -14,10 +14,8 @@ import clsx from "clsx";
 import IconButton from "@material-ui/core/IconButton";
 import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-// import { checkUserValid, resetPassword } from "../../actions/auth.jsx";/
-import { checkUserValid, resetPassword } from "../../actions/Auth.js";
-// import { VALID } from "../../constants/actions";
-import { VALID } from "../../constants/action.js";
+import { checkUserValid, resetPassword } from "../../actions/Auth";
+import { VALID } from "../../constants/action";
 
 const ForgotPassword = ({ match }) => {
   const classes = useStyles();
@@ -31,28 +29,21 @@ const ForgotPassword = ({ match }) => {
     if (book.msg) setErr(true);
   }, [book]);
 
-  console.log(match.params.token);
+  useEffect(() => {
+    dispatch(checkUserValid(match.params.token, history));
+  }, [dispatch, match.params.token, history]);
 
-  const Alert = (props) => {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
-  };
+  const Alert = (props) => (
+    <MuiAlert elevation={6} variant="filled" {...props} />
+  );
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const handleClickOpen = () => setOpen(true);
 
   const handleClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-
+    if (reason === "clickaway") return;
     setErr(false);
     dispatch({ type: VALID, payload: {} });
   };
-
-  useEffect(() => {
-    dispatch(checkUserValid(match.params.token, history));
-  }, []);
 
   const [values2, setValues2] = useState({
     password: "",
@@ -87,15 +78,17 @@ const ForgotPassword = ({ match }) => {
   const handleMouseDownPassword3 = (event) => {
     event.preventDefault();
   };
+
   const handleSubmitPassword = (e) => {
     e.preventDefault();
     dispatch(
       resetPassword(values2.password, values3.password, match.params.token)
     );
   };
+
   return (
     <>
-      {err ? (
+      {err && (
         <Snackbar
           style={{ top: "10%", left: "55%" }}
           anchorOrigin={{ horizontal: "center", vertical: "top" }}
@@ -107,7 +100,7 @@ const ForgotPassword = ({ match }) => {
             <strong>{book?.msg}</strong>
           </Alert>
         </Snackbar>
-      ) : null}
+      )}
       <div className={classes.bg}>
         <div className={classes.container}>
           <LockIcon className={classes.icon} />
@@ -123,7 +116,6 @@ const ForgotPassword = ({ match }) => {
                 variant="outlined"
               >
                 <InputLabel
-                  id="standard-basic"
                   htmlFor="new-password"
                   className={classes.passTitle}
                 >

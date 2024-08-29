@@ -1,13 +1,14 @@
 import { AUTH, VALID } from "../constants/action";
 import { API } from "../api/index";
 
+// Sign up action
 export const signUp = (formData, history) => async (dispatch) => {
   try {
     const { data } = await API.signUp(formData);
     dispatch({ type: AUTH, payload: data });
     dispatch({
       type: VALID,
-      payload: { msg: "Check your Email to verify and login" },
+      payload: { msg: "Check your email to verify and login", type: "info" },
     });
   } catch (err) {
     const errorMsg =
@@ -16,12 +17,16 @@ export const signUp = (formData, history) => async (dispatch) => {
   }
 };
 
+// Sign in action
 export const signIn = (formData, history) => async (dispatch) => {
   try {
     const { email, password } = formData;
     const { data } = await API.signIn({ email, password });
     dispatch({ type: AUTH, payload: data });
-    dispatch({ type: VALID, payload: { msg: "Logged In Successfully" } });
+    dispatch({
+      type: VALID,
+      payload: { msg: "Logged in successfully", type: "success" },
+    });
     history.push("/");
   } catch (err) {
     const errorMsg =
@@ -30,11 +35,15 @@ export const signIn = (formData, history) => async (dispatch) => {
   }
 };
 
+// Google/Facebook sign-in action
 export const googleFacebookSignIn = (formData, history) => async (dispatch) => {
   try {
     const { data } = await API.googleFacebookSignIn(formData);
     dispatch({ type: AUTH, payload: data });
-    dispatch({ type: VALID, payload: { msg: "Logged In successfully" } });
+    dispatch({
+      type: VALID,
+      payload: { msg: "Logged in successfully", type: "success" },
+    });
     history.push("/");
   } catch (err) {
     const errorMsg =
@@ -44,6 +53,7 @@ export const googleFacebookSignIn = (formData, history) => async (dispatch) => {
   }
 };
 
+// Send password reset mail action
 export const sendPasswordMail = (resetEmail) => async (dispatch) => {
   try {
     const { data } = await API.sendPasswordMail({ email: resetEmail });
@@ -56,6 +66,7 @@ export const sendPasswordMail = (resetEmail) => async (dispatch) => {
   }
 };
 
+// Check user validity action
 export const checkUserValid = (token, history) => async (dispatch) => {
   try {
     const { data } = await API.checkUserValid({ token });
@@ -69,6 +80,7 @@ export const checkUserValid = (token, history) => async (dispatch) => {
   }
 };
 
+// Reset password action
 export const resetPassword =
   (password, confirmPassword, token) => async (dispatch) => {
     try {
@@ -86,6 +98,7 @@ export const resetPassword =
     }
   };
 
+// Send email verification action
 export const sendVerifyMail = (verifyEmail) => async (dispatch) => {
   try {
     const { data } = await API.verifyEmail({ email: verifyEmail });
@@ -98,6 +111,7 @@ export const sendVerifyMail = (verifyEmail) => async (dispatch) => {
   }
 };
 
+// Verify user action
 export const verifiedUser = (token, history) => async (dispatch) => {
   try {
     const { data } = await API.verifiedUser({ token });
